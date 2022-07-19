@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo-wrapper">
+            <img src="./logo.58169365.png" alt="logo">
+            <p class="logo-BrandName"> Kafene</p>
+        </div>
+        <div>
+            <ul>
+                <li><a href="index.html">Orders</a></li>
+                <li><a href="product.html">Products</a></li>
+                <li><a href="user.html">Users</a></li>
+            </ul>
+        </div>
+        <div class="logoutwrapper">
+            <p class="logoutbtn" onclick="logOut()">Logout</p>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <h1>Users</h1>
+
+            <div class="rest-form">
+                <form>
+                    <input class="searchbox" type="search" id="myText" placeholder="Search by Name"
+                        onkeyup="mySearch()">
+                    <input type="reset" class="reset-btn" value="Reset" onclick="fetchData()">
+                </form>
+            </div>
+
+            <div>
+                <div class="container">
+                    <div>
+                        <div class="col-100">
+                            <table class="table">
+                                <thead>
+                                    <th>ID</th>
+                                    <th>User Avatar</th>
+                                    <th>Full Name</th>
+                                    <th>DoB</th>
+                                    <th>Gender</th>
+                                    <th>Current Location</th>
+                                </thead>
+                                <tbody id="listData">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        let status = window.localStorage.getItem("loginStatus");
+        function logOut() {
+            window.localStorage.setItem("loginStatus", "false")
+            window.location.href = "login.html";
+        }
+        // order list from api
+        function fetchData() {
+            document.getElementById("listData").innerHTML = "";
+            fetch('https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/users')
+                .then(response => response.json())
+                .then((data) => {
+                    data && data.map((item) => {
+                        var newRow = document.createElement("tr");
+                        newRow.innerHTML =
+                            `<td>${item.id}</td>
+                        <td class="image"><img src=${item.profilePic} /></td>
+                        <td>${item.fullName}</td>
+                        <td>${item.dob}</td>
+                        <td>${item.gender}</td>
+                        <td>${item.currentCity},${item.currentCountry}</td>
+                        `
+                        document.getElementById("listData").appendChild(newRow);
+                    })
+                });
+
+        }
+        fetchData();
+
+        function mySearch() {
+            var typedata = document.getElementById("myText").value;
+            if (typedata.length >= 2) {
+                document.getElementById("listData").innerHTML = "";
+                console.log("typedata", typedata)
+
+                fetch(`https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/users?fullName=${typedata}`)
+                    .then(response => response.json())
+                    .then((data) => {
+                        data && data.map((item) => {
+                            console.log("data", data)
+                            var newRow = document.createElement("tr");
+                            newRow.innerHTML =
+                                `<td>${item.id}</td>
+                        <td class="image"><img src=${item.profilePic} /></td>
+                        <td>${item.fullName}</td>
+                        <td>${item.dob}</td>
+                        <td>${item.gender}</td>
+                        <td>${item.currentCity},${item.currentCountry}</td>
+                        `
+                            document.getElementById("listData").innerHTML = "";
+                            document.getElementById("listData").appendChild(newRow);
+                        })
+                    });
+
+
+
+            }
+            else {
+                alert("Please enter atleast two characters")
+                fetchData();
+            }
+
+
+            // else {
+            //     ("Please enter atleast two characters")
+            //     // fetchData();
+            // }
+
+
+        }
+
+
+
+    </script>
+</body>
+
+</html>

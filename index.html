@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo-wrapper">
+            <img src="./logo.58169365.png" alt="logo">
+            <p class="logo-BrandName"> Kafene</p>
+        </div>
+        <div>
+            <ul>
+                <li><a href="index.html">Orders</a></li>
+                <li><a href="product.html">Products</a></li>
+                <li><a href="user.html">Users</a></li>
+            </ul>
+        </div>
+        <div class="logoutwrapper">
+            <p class="logoutbtn" onclick="logOut()">Logout</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Orders</h1>
+        </div>
+        <div>
+            <div class="container">
+                <div class="flex justify-space-between">
+                    <div class="col-30">
+                        <h3>Filters</h3>
+                        <p id="count">Count:0</p>
+                        <div>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" name="orders" value="New" checked
+                                        onclick="fetchData()">New</label>
+                            </p>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" name="orders" value="Packed" checked
+                                        onclick="fetchData()">Packed</label>
+                            </p>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" name="orders" value="InTransit" checked
+                                        onclick="fetchData()">InTransition</label>
+                            </p>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" name="orders" value="Delivered" checked
+                                        onclick="fetchData()">Delievered</label>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-70">
+                        <table class="table">
+                            <thead>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </thead>
+                            <tbody id="listData">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let status = window.localStorage.getItem("loginStatus");
+        function logOut() {
+            window.localStorage.setItem("loginStatus", "false")
+            window.location.href = "login.html";
+        }
+
+        // order list from api
+        function fetchData() {
+            fetch('https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/orders')
+                .then(response => response.json())
+                .then((data) => {
+                    // for checkbox
+                    let checkboxArray = [];
+                    let finalData = [];
+                    let filtredData = [];
+                    document.getElementById("listData").innerHTML = "";
+                    var cb = document.getElementsByName("orders");
+                    var total = 0;
+                    for (var i = 0; i < cb.length; i++) {
+                        if (cb[i].checked) {
+                            checkboxArray.push(cb[i].value);
+                        }
+                    }
+                    // api data filter
+                    filtredData = data.filter(item => checkboxArray.includes(item.orderStatus));
+                    filtredData && filtredData.map((item) => {
+                        var newRow = document.createElement("tr");
+                        newRow.innerHTML =
+                            `<td>${item.id}</td>
+                        <td>${item.customerName}</td>
+                        <td>${item.orderDate} <br /> ${item.orderTime}</td>
+                        <td>${item.amount}</td>
+                        <td>${item.orderStatus}</td>
+                        `
+                        document.getElementById("listData").appendChild(newRow);
+
+                        let total;
+                        total = filtredData.length;
+                        let mycountdata = document.getElementById("count");
+                        mycountdata.innerHTML = `Count: ${total}`;
+
+                        console.log(filtredData.length);
+                    })
+                });
+
+        }
+        fetchData();
+
+    </script>
+
+</body>
+
+</html>

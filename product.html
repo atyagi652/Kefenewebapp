@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo-wrapper">
+            <img src="./logo.58169365.png" alt="logo">
+            <p class="logo-BrandName"> Kafene</p>
+        </div>
+        <div>
+            <ul>
+                <li><a href="index.html">Orders</a></li>
+                <li><a href="product.html">Products</a></li>
+                <li><a href="user.html">Users</a></li>
+            </ul>
+        </div>
+        <div class="logoutwrapper">
+            <p class="logoutbtn" onclick="logOut()">Logout</p>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <h1>Orders</h1>
+        </div>
+        <div>
+            <div class="container">
+                <div class="flex justify-space-between">
+                    <div class="col-30">
+                        <h3>Filters</h3>
+                        <p id="count">Count:0</p>
+                        <div>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" id="expired" name="expired" checked
+                                        onclick="fetchData()">Expired</label>
+                            </p>
+                            <p>
+                                <label class="checkbox"><input type="checkbox" id="lowStock" name="low-stock" checked
+                                        onclick="fetchData()">Low
+                                    stock</label>
+                            </p>
+
+                        </div>
+                    </div>
+
+                    <div class="col-70">
+                        <table class="table">
+                            <thead>
+                                <th>ID</th>
+                                <th>Product Name</th>
+                                <th>Product Brand</th>
+                                <th>Expiry Date</th>
+                                <th>Unit price</th>
+                                <th>Stock</th>
+                            </thead>
+                            <tbody id="listData">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let status = window.localStorage.getItem("loginStatus");
+        function logOut() {
+            window.localStorage.setItem("loginStatus", "false")
+            window.location.href = "login.html";
+        }
+
+
+        // product list from api
+
+        function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2)
+                month = '0' + month;
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+        //
+        function fetchData() {
+            fetch('https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/products')
+                .then(response => response.json())
+                .then((data) => {
+
+                    let listData = data;
+                    var today = new Date();
+                    var dd = String(today.getDate()).padStart(2, '0');
+                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    var yyyy = today.getFullYear();
+                    var date = yyyy + '-' + mm + '-' + dd;
+
+                    // for checkbox
+                    var expired = document.getElementById("expired").checked;
+                    var lowStock = document.getElementById("lowStock").checked;
+                    var resultProductData;
+                    if (expired && lowStock) {
+                        document.getElementById("listData").innerHTML = "";
+                        console.log("her1")
+                        resultProductData = data.filter(
+                            function (item) {
+                                var convertedDate = formatDate(item.expiryDate);
+                                return convertedDate < date && item.stock < 100;
+                            }
+                        );
+                    }
+                    else if (expired) {
+                        document.getElementById("listData").innerHTML = "";
+                        console.log("her2")
+                        resultProductData = data.filter(
+                            function (item) {
+                                var convertedDate = formatDate(item.expiryDate);
+                                return convertedDate < date;
+                            }
+                        );
+                    }
+                    else if (lowStock) {
+                        document.getElementById("listData").innerHTML = "";
+                        console.log("her3")
+                        resultProductData = data.filter(
+                            function (item) {
+                                var convertedDate = formatDate(item.expiryDate);
+                                return item.stock < 100;
+                            }
+                        );
+                    }
+                    else {
+                        document.getElementById("listData").innerHTML = "";
+                        console.log("her4")
+                        resultProductData = data;
+                    }
+                    console.log("resultProductData", expired, lowStock)
+                    resultProductData.map((item) => {
+                        var newRow = document.createElement("tr");
+                        newRow.innerHTML =
+                            `<td>${item.id}</td>
+                        <td>${item.medicineName}</td>
+                        <td>${item.medicineBrand}</td>
+                        <td>${item.expiryDate}</td>
+                        <td>${item.unitPrice}</td>
+                        <td>${item.stock}</td>
+                        `
+                        document.getElementById("listData").appendChild(newRow);
+
+                        let total;
+                        total = resultProductData.length;
+                        let mycountdata = document.getElementById("count");
+                        mycountdata.innerHTML = `Count: ${total}`;
+
+                        console.log(resultProductData.length);
+                    })
+                });
+
+        }
+        fetchData();
+
+
+    </script>
+</body>
+
+</html>
